@@ -105,3 +105,16 @@ async function getUser(email: string) {
 
 // Example usage
 getUser('user5@example.com').catch(console.error);
+
+
+
+/*
+
+// Use this way to insert dynamic values while writing into the db
+
+const query = 'SELECT * FROM users WHERE email = $1';
+const values = [email];
+const result = await client.query(query, values);
+
+
+*/
