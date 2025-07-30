@@ -3,6 +3,10 @@ import cors from "cors";
 import dotenv from "dotenv";
 import pool  from "./config/db.js";
 
+import userRoutes from "./routes/userRoutes.js";
+import errorhandling from "./middlewares/errorHandler.js";
+import createUserTable from "./data/createUserTable.js";
+
 dotenv.config();
 
 const app = express();
@@ -23,9 +27,13 @@ app.get("/", async (req, res) => {
     }
 });
 
+app.use("/api", userRoutes);
+
 //error handler
+app.use(errorhandling);
 
-
+//create Table before starting server
+createUserTable();
 
 // server running
 app.listen(process.env.PORT, () => {
