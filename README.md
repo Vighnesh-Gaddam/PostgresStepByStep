@@ -1,46 +1,62 @@
-# Express + PostgreSQL + Docker CRUD API
+# **Express + PostgreSQL + Docker CRUD API**
 
-This project demonstrates a simple CRUD API built with **Express.js** and **PostgreSQL**, using **Docker** for easy database setup.
+A production-ready **CRUD API** built using **Express.js** and **PostgreSQL**, fully containerized with **Docker** for fast setup and deployment.
 
 ---
 
 ## **Features**
 
-* REST API built using **Express.js**
-* **PostgreSQL** database running inside Docker
+* REST API using **Express.js**
+* **PostgreSQL** database inside Docker
 * Automatic table creation (on startup)
-* Basic CRUD endpoints:
+* CRUD endpoints:
 
   * Create User
   * Get All Users
-  * Get User By ID
+  * Get User by ID
   * Update User
   * Delete User
+* Environment variable support (`.env`)
+* Optional Dockerized Node.js server
+
+---
+
+## **Tech Stack**
+
+* **Node.js** (Express.js)
+* **PostgreSQL**
+* **Docker**
 
 ---
 
 ## **Prerequisites**
 
-* [Docker](https://docs.docker.com/get-docker/) installed and running
+* [Docker](https://docs.docker.com/get-docker/) installed & running
 * [Node.js](https://nodejs.org/) (v18 or newer)
-* [Postman](https://www.postman.com/) (optional, for testing)
+* [Postman](https://www.postman.com/) (optional, for testing APIs)
 
 ---
 
 ## **1. Run PostgreSQL with Docker**
 
-```bash
-# Remove old container if exists (optional)
-docker rm -f postgres-db
+Remove old container (optional):
 
-# Run PostgreSQL container
+```bash
+docker rm -f postgres-db
+```
+
+Run PostgreSQL container:
+
+```bash
 docker run --name postgres-db \
   -e POSTGRES_PASSWORD=vicky \
+  -e POSTGRES_USER=postgres \
+  -e POSTGRES_DB=postgres \
   -p 5432:5432 \
   -d postgres
 ```
 
-### **Check if container is running**
+Check if the container is running:
 
 ```bash
 docker ps
@@ -61,13 +77,13 @@ abc123         postgres   Up ...          0.0.0.0:5432->5432/tcp   postgres-db
 
 * **User:** postgres
 * **Password:** vicky
-* **Host:** localhost
+* **Host:** 127.0.0.1
 * **Port:** 5432
 * **Database:** postgres
 
-These are set in the `.env` file:
+### **.env file**
 
-```
+```env
 DB_USER=postgres
 DB_PASSWORD=vicky
 DB_HOST=127.0.0.1
@@ -78,7 +94,7 @@ PORT=3000
 
 ---
 
-## **3. Install Node.js dependencies**
+## **3. Install Dependencies**
 
 ```bash
 npm install
@@ -86,13 +102,13 @@ npm install
 
 ---
 
-## **4. Run the app**
+## **4. Run the API Server**
 
 ```bash
 npm start
 ```
 
-Server should start at:
+API is available at:
 
 ```
 http://localhost:3000
@@ -102,16 +118,16 @@ http://localhost:3000
 
 ## **5. API Endpoints**
 
-### **Base URL**
+Base URL:
 
 ```
 http://localhost:3000/api
 ```
 
-### **Endpoints**
+Endpoints:
 
-* `GET /users` → Get all users
-* `GET /users/:id` → Get a user by ID
+* `GET /users` → Fetch all users
+* `GET /users/:id` → Fetch a user by ID
 * `POST /users` → Create user
   **Body:**
 
@@ -126,9 +142,9 @@ http://localhost:3000/api
 
 ---
 
-## **6. Reset Table (Optional)**
+## **6. Reset the Table**
 
-To clear the table and reset IDs:
+To clear the table and reset ID:
 
 ```sql
 TRUNCATE TABLE users RESTART IDENTITY;
@@ -136,7 +152,7 @@ TRUNCATE TABLE users RESTART IDENTITY;
 
 ---
 
-## **7. Stop and Remove Container**
+## **7. Stop & Remove Containers**
 
 ```bash
 docker stop postgres-db
@@ -145,23 +161,81 @@ docker rm postgres-db
 
 ---
 
-## **8. Build Docker Image for Node App (Optional)**
+## **8. Build & Run Node App with Docker (Optional)**
+
+### **Build image**
 
 ```bash
-# Build image
 docker build -t express-crud-app .
+```
 
-# Run app container
-docker run -p 3000:3000 --name express-app --link postgres-db:postgres express-crud-app
+### **Run app container (linked with Postgres)**
+
+```bash
+docker run -p 3000:3000 \
+  --name express-app \
+  --link postgres-db:postgres \
+  express-crud-app
 ```
 
 ---
 
-### **Tech Stack**
+## **Optional: Use Docker Compose**
 
-* Node.js
-* Express.js
-* PostgreSQL
-* Docker
+Create `docker-compose.yml`:
+
+```yaml
+version: "3.8"
+services:
+  postgres:
+    image: postgres
+    container_name: postgres-db
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: vicky
+      POSTGRES_DB: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  app:
+    build: .
+    container_name: express-app
+    restart: always
+    ports:
+      - "3000:3000"
+    depends_on:
+      - postgres
+    environment:
+      DB_USER: postgres
+      DB_PASSWORD: vicky
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: postgres
+      PORT: 3000
+
+volumes:
+  postgres_data:
+```
+
+Run everything:
+
+```bash
+docker-compose up --build
+```
+
+Stop:
+
+```bash
+docker-compose down
+```
 
 ---
+
+## **Conclusion**
+
+With Docker, you don’t need to manually install PostgreSQL locally. Just run the container and connect via your `.env` file. You can easily scale or deploy this project using Docker Compose.
+
+
